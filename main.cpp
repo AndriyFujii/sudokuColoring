@@ -76,11 +76,12 @@ int highestSaturation(vector<vector<int>> connectivityMatrix, vector<int> colorV
 }
 
 //Coloring with backtracking
-bool coloring(vector<vector<int>> connectivityMatrix, vector<int> &colorVector, int pos)
+bool coloring(vector<vector<int>> connectivityMatrix, vector<int> &colorVector, int pos, int N)
 {
     int color = 1;
     while (!isCompleted(colorVector))
     {
+        //Next position is the one with the highest saturation
         pos = highestSaturation(connectivityMatrix, colorVector);
         for (int i = 0; i < colorVector.size(); i++)
         {
@@ -88,18 +89,18 @@ bool coloring(vector<vector<int>> connectivityMatrix, vector<int> &colorVector, 
             {
                 color++;
                 //Failed, backtrack and try again
-                if (color > 9)
+                if (color > N)
                     return false;
 
                 i = 0;
             }
         }
         colorVector[pos] = color;
-        if (!coloring(connectivityMatrix, colorVector, pos))
+        if (!coloring(connectivityMatrix, colorVector, pos, N))
         {
             colorVector[pos] = 0;
             color++;
-            if (color > 9)
+            if (color > N)
                 return false;
         }
     }
@@ -109,20 +110,93 @@ bool coloring(vector<vector<int>> connectivityMatrix, vector<int> &colorVector, 
 
 int main()
 {
-    int N = 9;
-    vector<vector<int>> connectivityMatrix(N * N, vector<int>(N * N));
-    vector<int> colorVector(N * N, 0);
+    /*cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
+    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
+    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
+    cout << "------+-------+------" << '\n';
+    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
+    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
+    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
+    cout << "------|-------|------" << '\n';
+    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
+    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
+    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
+    system("pause");*/
+    header();
 
-    fillBoard(connectivityMatrix, N);
+    bool tryAgain;
 
-    //Positions go from 0 to N^2-1
-    int pos = 0;
+    do
+    {
+        system("cls");
 
-    colorVector[pos] = 1;
+        int N = selectBoardSize();
 
-    coloring(connectivityMatrix, colorVector, pos);
+        system("cls");
 
-    showVector(colorVector, N);
+        printMatrix(N);
+        cout << "Enter the starting position for the sudoku:\n";
+
+        int startingPos;
+        bool exit;
+        //Validates the input
+        do
+        {
+            cin >> startingPos;
+
+            exit = true;
+            //Positions go from 0 to N^2-1
+            if (startingPos < 0 || startingPos > N * N - 1)
+            {
+                system("cls");
+
+                printMatrix(N);
+                cout << "Invalid position! Try again:\n";
+                exit = false;
+            }
+        } while (!exit);
+
+        system("cls");
+
+        vector<vector<int>> connectivityMatrix(N * N, vector<int>(N * N));
+        vector<int> colorVector(N * N, 0);
+
+        fillBoard(connectivityMatrix, N);
+
+        colorVector[startingPos] = 1;
+
+        coloring(connectivityMatrix, colorVector, 0, N);
+
+        printMatrix(N);
+        cout << "Starting position: " << startingPos << '\n';
+        showVector(colorVector, N, startingPos);
+
+        char choice;
+        //If the program should run again or close
+        do
+        {
+            if (N == 16)
+                gotoxy(0, N * 2 + 3);
+            else
+                gotoxy(0, N * 3 + 3);
+            cout << "Finished! Try again? (Y/N) ";
+            cin >> choice;
+            choice = tolower(choice);
+
+            exit = false;
+            //Only leaves the loop if Y or N are typed
+            if (choice == 'y')
+            {
+                tryAgain = true;
+                exit = true;
+            }
+            else if (choice == 'n')
+            {
+                tryAgain = false;
+                exit = true;
+            }
+        } while (!exit);
+    } while (tryAgain);
 
     system("pause");
 }
