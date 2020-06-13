@@ -4,13 +4,6 @@
 
 using namespace std;
 
-/*struct sudokuNode
-{
-    int i;
-    int j;
-    int color;
-};*/
-
 //Receives the sudoku matrix and its size and fills it with the graph conectivity
 //Two nodes are in the same grid if (i/n) == (i'/n) and (j/n) == (j'/n)
 void fillBoard(vector<vector<int>> &connectivity, int N)
@@ -107,6 +100,7 @@ bool isCompleted(vector<int> color, int N)
     return true;
 }
 
+//Prints vector, receives the vector and board size
 void showVector(vector<int> vector, int N)
 {
     for (int i = 0; i < N*N; i++)
@@ -121,16 +115,37 @@ void showVector(vector<int> vector, int N)
     
 }
 
-//Checks the connectivity matrix to see if pos is adjacent to a color already
-bool isAdjacent(vector<vector<int>> connectivityMatrix, vector<int> colorVector, int pos, int color, int N)
+//Coloring with backtracking
+bool coloring(vector<vector<int>> connectivityMatrix, vector<int> &colorVector, int N, int pos)
 {
-    for (int i = 0; i < N*N; i++)
+    int color = 1;
+    while(!isCompleted(colorVector, N))
     {
-        if(connectivityMatrix[i][pos] == 1 && colorVector[i] == color)
-            return true;
+        pos = highestSaturation(connectivityMatrix, colorVector, N);
+        for (int i = 0; i < N * N; i++)
+        {
+            if (connectivityMatrix[i][pos] == 1 && colorVector[i] == color)
+            {
+                color++;
+                //Failed, backtrack and try again
+                if (color>9)
+                    return false;
+                
+                i = 0;
+            }
+        }
+        colorVector[pos] = color;
+        if(!coloring(connectivityMatrix, colorVector, N, pos))
+        {
+            colorVector[pos] = 0;
+            color++;
+            if (color>9)
+                return false;
+        }
+        
     }
-    
-    return false;
+
+    return true;
 }
 
 int main()
@@ -147,34 +162,7 @@ int main()
 
     colorVector[pos] = 1;
 
-    for (int color = 1; color <= N; color++)
-    {
-        for (int i = 0; i < N*N; i++)
-        {
-            if (!isAdjacent(connectivityMatrix, colorVector, i, color, N) && colorVector[i] == 0)
-            {
-                colorVector[i] = color;
-            }
-            
-        }
-        
-    }
-    
-    /*do
-    {
-        int color = 1;
-        pos = highestSaturation(connectivityMatrix, colorVector, N);
-        for (int i = 0; i < N * N; i++)
-        {
-            if (connectivityMatrix[i][pos] == 1 && colorVector[i] == color)
-            {
-                color++;
-                i = 0;
-            }
-        }
-
-        colorVector[pos] = color;
-    } while (!isCompleted(colorVector, N));*/
+    coloring(connectivityMatrix, colorVector, N, pos);
 
     showVector(colorVector, N);
 
