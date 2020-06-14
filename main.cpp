@@ -92,10 +92,11 @@ bool coloring(vector<vector<int>> connectivityMatrix, vector<int> &colorVector, 
                 if (color > N)
                     return false;
 
-                i = 0;
+                i = -1;
             }
         }
         colorVector[pos] = color;
+        //If failed, remove last color added and moves to the next color
         if (!coloring(connectivityMatrix, colorVector, pos, N))
         {
             colorVector[pos] = 0;
@@ -110,31 +111,21 @@ bool coloring(vector<vector<int>> connectivityMatrix, vector<int> &colorVector, 
 
 int main()
 {
-    /*cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
-    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
-    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
-    cout << "------+-------+------" << '\n';
-    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
-    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
-    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
-    cout << "------|-------|------" << '\n';
-    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
-    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
-    cout << "1 2 3 | 4 5 6 | 7 8 9" << '\n';
-    system("pause");*/
     header();
 
     bool tryAgain;
-
     do
     {
         system("cls");
 
         int N = selectBoardSize();
 
+        vector<vector<int>> connectivityMatrix(N * N, vector<int>(N * N));
+        vector<int> colorVector(N * N, 0);
+
         system("cls");
 
-        printMatrix(N);
+        printOnGrid(colorVector, N, 0, 0);
         cout << "Enter the starting position for the sudoku:\n";
 
         int startingPos;
@@ -150,7 +141,7 @@ int main()
             {
                 system("cls");
 
-                printMatrix(N);
+                printOnGrid(colorVector, N, 0, 0);
                 cout << "Invalid position! Try again:\n";
                 exit = false;
             }
@@ -158,27 +149,23 @@ int main()
 
         system("cls");
 
-        vector<vector<int>> connectivityMatrix(N * N, vector<int>(N * N));
-        vector<int> colorVector(N * N, 0);
-
+        //Fills the connectivity matrix
         fillBoard(connectivityMatrix, N);
-
+        //Sets the starting position as color 1 and starts the coloring
         colorVector[startingPos] = 1;
-
         coloring(connectivityMatrix, colorVector, 0, N);
 
-        printMatrix(N);
+        //Prints all boards
+        printOnGrid(colorVector, N, 0, 0);
         cout << "Starting position: " << startingPos << '\n';
-        showVector(colorVector, N, startingPos);
+        cout << "Solved sudoku:" << '\n';
+        printOnGrid(colorVector, N, N + sqrt(N) + 2, 1);
+        printOnGrid(colorVector, N, 2 * (N + sqrt(N)) + 2, 2);
 
         char choice;
         //If the program should run again or close
         do
         {
-            if (N == 16)
-                gotoxy(0, N * 2 + 3);
-            else
-                gotoxy(0, N * 3 + 3);
             cout << "Finished! Try again? (Y/N) ";
             cin >> choice;
             choice = tolower(choice);

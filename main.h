@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <conio.h>
+#include <math.h>
 
 #define KEY_UP 72
 #define KEY_DOWN 80
@@ -32,79 +33,130 @@ void textcolor(int text, int background)
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (WORD)(text | background << 4));
 }
 
-//Prints vector and a colored version, receives the vector and board size
-void showVector(std::vector<int> vector, int N, int startingPos)
+//Jumps to position x,y in the cmd
+void gotoxy(int x, int y)
 {
-    for (int i = 0; i < vector.size(); i++)
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
+//Prints the sudoku grids
+void printGrid(int N)
+{
+    if (N == 4)
     {
-        std::cout << vector[i];
-        //Properly spaces the numbers
-        if (N == 4 || N == 9)
-            std::cout << ' ';
-        else
-        {
-            if (vector[i] < 10)
-                std::cout << "  ";
-            else
-                std::cout << " ";
-        }
-        if (i % N == N - 1)
-        {
-            std::cout << '\n';
-        }
+        std::cout << " n  n | n  n " << '\n';
+        std::cout << " n  n | n  n " << '\n';
+        std::cout << "------|------" << '\n';
+        std::cout << " n  n | n  n " << '\n';
+        std::cout << " n  n | n  n " << '\n';
     }
-
-    if (N == 4 || N == 9)
+    else if (N == 9)
     {
-        for (int i = 0; i < vector.size(); i++)
-        {
-            textcolor(WHITE, vector[i]);
-            std::cout << ' ';
-            textcolor(WHITE, BLACK);
-            std::cout << ' ';
-            //Properly spaces the numbers*
-            if (i % N == N - 1)
-            {
-
-                std::cout << '\n';
-            }
-        }
+        std::cout << " n  n  n | n  n  n | n  n  n " << '\n';
+        std::cout << " n  n  n | n  n  n | n  n  n " << '\n';
+        std::cout << " n  n  n | n  n  n | n  n  n " << '\n';
+        std::cout << "---------|---------|---------" << '\n';
+        std::cout << " n  n  n | n  n  n | n  n  n " << '\n';
+        std::cout << " n  n  n | n  n  n | n  n  n " << '\n';
+        std::cout << " n  n  n | n  n  n | n  n  n " << '\n';
+        std::cout << "---------|---------|---------" << '\n';
+        std::cout << " n  n  n | n  n  n | n  n  n " << '\n';
+        std::cout << " n  n  n | n  n  n | n  n  n " << '\n';
+        std::cout << " n  n  n | n  n  n | n  n  n " << '\n';
+    }
+    else
+    {
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << "----------------|----------------|----------------|----------------" << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << "----------------|----------------|----------------|----------------" << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << "----------------|----------------|----------------|----------------" << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
+        std::cout << " n   n   n   n  | n   n   n   n  | n   n   n   n  | n   n   n   n  " << '\n';
     }
 }
 
-/* textcolor(WHITE, vector[i]);
-        std::cout << vector[i];
-        textcolor(WHITE, BLACK);*/
-
-//Shows the possible starting positions for the sudoku
-void printMatrix(int N)
+//Prints on the sudoku grid, option chooses what
+//0 for the starting positions
+//1 for the solved sudoku with numbers
+//2 for the solved sudoku with colors
+void printOnGrid(std::vector<int> colorVector, int N, int posY, int option)
 {
+    gotoxy(0, posY);
+    printGrid(N);
+
+    int newPosY = posY;
+    int newPosX = 1;
+    int gridCounterX = 0;
+    int gridCounterY = 0;
+
     for (int i = 0; i < N * N; i++)
     {
-        std::cout << i;
-        //Properly spaces the numbers
-        if (N == 4 || N == 9)
+        gotoxy(newPosX, newPosY);
+
+        switch (option)
         {
-            if (i < 10)
-                std::cout << "  ";
+        case 0:
+            std::cout << i;
+            break;
+        case 1:
+            std::cout << colorVector[i];
+            break;
+        case 2:
+            textcolor(WHITE, colorVector[i]-1);
+            std::cout << ' ';
+            textcolor(WHITE, BLACK);
+            break;
+        default:
+            break;
+        }
+
+        gridCounterX++;
+        if (gridCounterX == sqrt(N))
+        {
+            if (N == 4 || N == 9)
+                newPosX += 4;
             else
-                std::cout << " ";
+                newPosX += 5;
+            gridCounterX = 0;
         }
         else
         {
-            if (i < 10)
-                std::cout << "   ";
-            else if (i < 100)
-                std::cout << "  ";
+            if (N == 4 || N == 9)
+                newPosX += 3;
             else
-                std::cout << " ";
+                newPosX += 4;
         }
+
         if (i % N == N - 1)
         {
-            std::cout << '\n';
+            newPosY++;
+            newPosX = 1;
+
+            gridCounterY++;
+            if (gridCounterY == sqrt(N))
+            {
+                newPosY++;
+                gridCounterY = 0;
+            }
         }
     }
-    std::cout << '\n';
+    std::cout << "\n\n";
 }
 
 //Returns true if every position of the sudoku board has been colored, false otherwise
@@ -115,15 +167,6 @@ bool isCompleted(std::vector<int> color)
             return false;
 
     return true;
-}
-
-//Jumps to position x,y in the cmd
-void gotoxy(int x, int y)
-{
-    COORD coord;
-    coord.X = x;
-    coord.Y = y;
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
 //Select board size, arrow keys to move and enter to confirm
