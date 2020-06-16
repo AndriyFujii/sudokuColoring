@@ -7,7 +7,7 @@ using namespace std;
 
 //Receives the sudoku matrix and its size and fills it with the graph conectivity
 //Two nodes are in the same grid if (i/n) == (i'/n) and (j/n) == (j'/n)
-void fillBoard(vector<vector<int>> &connectivityMatrix, int N)
+void fillConnectivity(vector<vector<int>> &connectivityMatrix, int N)
 {
     //For for every node in matrix, i and j
     for (int i = 0; i < connectivityMatrix.size(); i++)
@@ -150,7 +150,7 @@ int main()
         system("cls");
 
         //Fills the connectivity matrix
-        fillBoard(connectivityMatrix, N);
+        fillConnectivity(connectivityMatrix, N);
         //Sets the starting position as color 1 and starts the coloring
         colorVector[startingPos] = 1;
         coloring(connectivityMatrix, colorVector, 0, N);

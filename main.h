@@ -108,7 +108,8 @@ void printOnGrid(std::vector<int> colorVector, int N, int posY, int option)
     for (int i = 0; i < N * N; i++)
     {
         gotoxy(newPosX, newPosY);
-
+		
+		//What to print on the grid
         switch (option)
         {
         case 0:
